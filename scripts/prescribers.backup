@@ -14,19 +14,42 @@ ORDER BY SUM(total_claim_count) DESC
 	
 -- b. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name,  specialty_description, and the total number of claims.
 
-SELECT npi, nppes_provider_last)org_name, nppes_provider_first_name.
-speciality_description, SUM(total_claim_count) AS sum_total_claim_count
+
+
+SELECT npi, nppes_provider_last_org_name,nppes_provider_first_name, specialty_description, SUM(total_claim_count) AS sum_total_claim_count
 FROM prescriber
 INNER JOIN prescription
-USING (npi)
-GROUP BY npi, nppes_provider_last_org_name, nppes_provider_first_name,
-specialty_description
+USING(npi)
+GROUP BY npi, nppes_provider_last_org_name,nppes_provider_first_name, specialty_description
 ORDER BY sum_total_claim_count DESC
+
+--Answer Bruce Pendley
 
 2. 
 -- a. Which specialty had the most total number of claims (totaled over all drugs)?
 
+SELECT specialty_description, SUM(total_claim_count) AS claim_count_sum
+FROM prescriber
+INNER JOIN prescription
+USING (npi)
+GROUP BY specialty_description
+ORDER BY SUM(total_claim_count) DESC
+ --Answer Family Practice
+
 -- b. Which specialty had the most total number of claims for opioids?
+
+SELECT specialty_description,
+COUNT(opioid_drug_flag = 'y') AS opioid_count
+FROM prescriber
+LEFT JOIN prescription
+USING (npi)
+LEFT JOIN drug
+USING (drug_name)
+GROUP BY specialty_description
+ORDER BY COUNT(opioid_drug_flag) DESC
+
+--Answer: Nurse Practitioner
+
 
 -- c. **Challenge Question:** Are there any specialties that appear in the prescriber table that have no associated prescriptions in the prescription table?
 
@@ -35,7 +58,24 @@ ORDER BY sum_total_claim_count DESC
 3. 
 -- a. Which drug (generic_name) had the highest total drug cost?
 
+SELECT generic_name, SUM(total_drug_cost) AS total_cost
+FROM prescription
+LEFT JOIN drug
+USING (drug_name)
+GROUP BY generic_name
+ORDER BY total_cost DESC;
+
+--Answer: Insulin Glargine
+
+
 -- b. Which drug (generic_name) has the hightest total cost per day? **Bonus: Round your cost per day column to 2 decimal places. Google ROUND to see how this works.**
+
+SELECT generic_name, SUM(total_drug_cost) AS total_cost
+FROM prescription
+LEFT JOIN drug
+USING (drug_name)
+GROUP BY generic_name
+ORDER BY total_cost DESC;
 
 4. 
 -- a. For each drug in the drug table, return the drug name and then a column named 'drug_type' which says 'opioid' for drugs which have opioid_drug_flag = 'Y', says 'antibiotic' for those drugs which have antibiotic_drug_flag = 'Y', and says 'neither' for all other drugs.
@@ -51,6 +91,13 @@ ORDER BY sum_total_claim_count DESC
 
 6. 
 -- a. Find all rows in the prescription table where total_claims is at least 3000. Report the drug_name and the total_claim_count.
+
+SELECT total_claim_count, drug_name
+FROM prescription
+WHERE total_claim_count >= 3000
+ORDER BY total_claim_count DESC;
+
+--Answer Oxcodone 4538
 
 -- b. For each instance that you found in part a, add a column that indicates whether the drug is an opioid.
 
